@@ -28,20 +28,20 @@ Examples
 
 Basic use:
 
-   <script type="text/javascript">
-     $("[data-toggle=scaletext]").scaleText();
-   </script>
+     <script type="text/javascript">
+       $("[data-toggle=scaletext]").scaleText();
+     </script>
    
 All arguments specified:
 
-   <script type="text/javascript">
-     $("[data-toggle=scaletext]").scaleText({
-       hDecrement: 0.9, 
-       pDecrement: 0.95, 
-       hElsSelector: 'h1, h2, h3, h4, h5, h6', 
-       pElsSelector: 'p, li'
-     });
-   </script>
+     <script type="text/javascript">
+       $("[data-toggle=scaletext]").scaleText({
+         hDecrement: 0.9, 
+         pDecrement: 0.95, 
+         hElsSelector: 'h1, h2, h3, h4, h5, h6', 
+         pElsSelector: 'p, li'
+       });
+     </script>
 
 Options available to pass to scaleText():
 
