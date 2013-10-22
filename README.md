@@ -69,7 +69,8 @@ Options available to pass to scaleText(), in a hash:
 #### Synopsis
 
      <div data-toggle="scaletext" data-scaletext-ARGUMENT="">
-       Lorem ipsum dolor sit amet...
+       <h1>This is a heading</h1>
+       <p>Lorem ipsum dolor sit amet...</p>
      </div>
 
 ####Arguments
@@ -87,13 +88,15 @@ Options available to pass to scaleText(), in a hash:
 #####Basic HTML Inovcation
 
      <div data-toggle="scaletext">
-       Lorem ipsum dolor sit amet...
+       <h1>This is a heading</h1>
+       <p>Lorem ipsum dolor sit amet...</p>
      </div>
 
 #####All Arguments Specified
 
      <div data-toggle="scaletext" data-scaletext-hdecrement="0.9" data-scaletext-pdecrement-"0.95" data-scaletext-helsselector="h1, h2, h3, h4, h5, h6" data-scaletext-pelsselector="p, li" data-scaletext-minhsize="32px" data-scaletext-minpsize="14px">
-       Lorem ipsum dolor sit amet...
+       <h1>This is a heading</h1>
+       <p>Lorem ipsum dolor sit amet...</p>
      </div>
 
 
