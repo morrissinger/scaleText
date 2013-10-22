@@ -48,4 +48,4 @@ Options available to pass to scaleText():
 -   `hDecrement` specifies the factor by which to decrement h-level element sizes downward.
 -   `pDecrement` specifies the factor by which to decrement p-level element sizes downward.
 -   `hElsSelector` specifies the h-level elements to look for. By default, this is h1, h2, h3, h4, h5, h6.
-`pElsSelector` specifies the p-level elements to look for. By default, this is p, li.
+-   `pElsSelector` specifies the p-level elements to look for. By default, this is p, li.
