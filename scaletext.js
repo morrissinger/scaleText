@@ -286,15 +286,32 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       minHSize = '32px',
       minPSize = '14px'
 
-  $.fn.scaleText = function(opts) {
+  // Allow invocation with the HTML syntax.
+  $(document).ready(function() {
+    $("[data-toggle=scaletext").scaleText();
+  });
+  
+  $.fn.scaleText = function(funcOpts) {
     var el = this;
+
+    var dataOpts = {
+      hDecrement:   ($(el).data('scaletext-hdecrement')   === undefined) ? hDecrement   : $(el).data('hdecrement'),
+      pDecrement:   ($(el).data('scaletext-pdecrement')   === undefined) ? pDecrement   : $(el).data('scaletext-pdecrement'),
+      hElsSelector: ($(el).data('scaletext-helsselector') === undefined) ? hElsSelector : $(el).data('scaletext-helsselector'),
+      pElsSelector: ($(el).data('scaletext-pelsselector') === undefined) ? pElsSelector : $(el).data('scaletext-pelsselector'),
+      minHSize:     ($(el).data('scaletext-minhsize')     === undefined) ? minHSize     : $(el).data('scaletext-minhsize'),
+      minPSize:     ($(el).data('scaletext-minpsize')     === undefined) ? minPSize     : $(el).data('scaletext-minpsize'),
+    }
+
+    var opts = $.extend(dataOpts, funcOpts);
+
     doScale(el, opts);
 
     $(el).on('resize', function(e) {
-      $(el).children(hElsSelector).each(function(index, hEl) {
+      $(el).children(opts.hElsSelector).each(function(index, hEl) {
         $(hEl).css('cssText', '');
       });
-      $(el).children(pElsSelector).each(function(index, pEl) {
+      $(el).children(opts.pElsSelector).each(function(index, pEl) {
         $(pEl).css('cssText', '');
       })
       doScale(el, opts);
@@ -302,28 +319,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   }
 
   function doScale(el, opts) {
-    if (opts === undefined) {
-      opts = {}
-    }
-
-    if ('hElsSelector' in opts) {
-      hElsSelector = opts.hElsSelector;
-    }
-
-    if ('pElsSelector' in opts) {
-      pElsSelector = opts.pElsSelector;
-    }
-
-    if ('minHSize' in opts) {
-      minHSize = opts.minHSize;
-    }
-
-    if ('minPSize' in opts) {
-      minPSize = opts.minPSize;
-    }
     
-    var pEls = $(el).children(pElsSelector);
-    var hEls = $(el).children(hElsSelector);
+    var pEls = $(el).children(opts.pElsSelector);
+    var hEls = $(el).children(opts.hElsSelector);
 
     var height = $(el).outerHeight();
     var parentHeight = $(el).parent().outerHeight();
@@ -336,7 +334,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     for (var i = 0; i <= 10; i++) {
       if (height >= parentHeight && ($(el).parent().css('overflow') == 'hidden') && !checkAutoHeight($(el))) {
-        decrementSizes({h: hEls, p: pEls, minHSize: minHSize, minPSize: minPSize});
+        decrementSizes(hEls, pEls, opts);
         var height = jQuery(el).outerHeight();
         var parentHeight = jQuery(el).parent().outerHeight();
       }
@@ -352,42 +350,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     return (origHeight < newHeight);
   }
 
-  function decrementSizes(opts) {
-    // Don't throw errors if the are no h-level elements.
-    if ('h' in opts) {
-      hEls = opts.h;
-    } else {
-      hEls = [];
-    }
-
-    // Don't throw errors if the are no p-level elements.
-    if ('p' in opts) {
-      pEls = opts.p;
-    } else {
-      pEls = [];
-    }
-
-    // Allow overriding global value for h-level decrement
-    if ('hDecrement' in opts) {
-      hDecrement = opts.hDecrement;
-    }
-
-    // Allow overriding global value for p-level decrement
-    if ('pDecrement' in opts) {
-      pDecrement = opts.pDecrement;
-    }
-
-    decrementHEls(hEls, opts.minHSize);
-    decrementPEls(pEls, opts.minPSize);
+  function decrementSizes(hEls, pEls, opts) {
+    decrementHEls(hEls, opts.minHSize, opts);
+    decrementPEls(pEls, opts.minPSize, opts);
   }
 
   // Decrements h-level elements
-  function decrementHEls(hEls, minSize) {
+  function decrementHEls(hEls, minSize, opts) {
     $(hEls).each(function(index, el) {
       cssAttributes = {
-        'font-size': sizeElAttr(el, 'font-size', hDecrement, minSize),
-        'line-height': sizeElAttr(el, 'line-height', hDecrement, minSize),
-        'margin-bottom': sizeElAttr(el, 'margin-bottom', hDecrement, minSize)
+        'font-size': sizeElAttr(el, 'font-size', opts.hDecrement, minSize),
+        'line-height': sizeElAttr(el, 'line-height', opts.hDecrement, minSize),
+        'margin-bottom': sizeElAttr(el, 'margin-bottom', opts.hDecrement, minSize)
       };
 
       $(el).css('cssText', formCssText(cssAttributes));
@@ -395,11 +369,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   }
 
   // Decrements p-level elements
-  function decrementPEls(pEls, minSize) {
+  function decrementPEls(pEls, minSize, opts) {
     $(pEls).each(function(index, el) {
       cssAttributes = {
-        'font-size': sizeElAttr(el, 'font-size', pDecrement, minSize),
-        'line-height': sizeElAttr(el, 'line-height', pDecrement, minSize)
+        'font-size': sizeElAttr(el, 'font-size', opts.pDecrement, minSize),
+        'line-height': sizeElAttr(el, 'line-height', opts.pDecrement, minSize)
       };
 
       $(el).css('cssText', formCssText(cssAttributes));
@@ -445,6 +419,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     $.each(cssAttributes, function(key, val) {
       cssText = cssText + key + ': ' + val + ' !important;'
     })
+
     return cssText;
   }
 
