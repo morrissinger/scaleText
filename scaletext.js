@@ -33,6 +33,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       pDecrement = 0.95, /* Factor by which to iterate p-level element sizes downward */
       hElsSelector = 'h1, h2, h3, h4, h5, h6', /* H-Level element selectors */
       pElsSelector = 'p, li'; /* P-Level element selectors */
+      minHSize = '32px',
+      minPSize = '14px'
 
   $.fn.scaleText = function(opts) {
     var el = this;
@@ -42,29 +44,49 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }
 
     if ('hElsSelector' in opts) {
-      hElsSelector = opts.hEls;
+      hElsSelector = opts.hElsSelector;
     }
 
     if ('pElsSelector' in opts) {
-      pElsSelector = opts.pEls;
+      pElsSelector = opts.pElsSelector;
+    }
+
+    if ('minHSize' in opts) {
+      minHSize = opts.minHSize;
+    }
+
+    if ('minPSize' in opts) {
+      minPSize = opts.minPSize;
     }
     
     var pEls = $(el).children(pElsSelector);
     var hEls = $(el).children(hElsSelector);
 
-    var height = jQuery(el).outerHeight();
-    var parentHeight = jQuery(el).parent().outerHeight();
+    var height = $(el).outerHeight();
+    var parentHeight = $(el).parent().outerHeight();
 
     // We don't want this to hang if there's some kind of problem, so using a for
-    // loop rather than a while loop.
+    // loop rather than a while loop. Also, if overflow is not hidden, then this
+    // is going to result in a full reduction in font size, because it will
+    // run until i > 10, so don't run this if overflow is not hidden. Lastly, if
+    // height is not constricted, don't run for the same reason.
+
     for (var i = 0; i <= 10; i++) {
-      if (height >= parentHeight) {
-        decrementSizes({h: hEls, p: pEls});
+      if (height >= parentHeight && ($(el).parent().css('overflow') == 'hidden') && !checkAutoHeight($(el))) {
+        decrementSizes({h: hEls, p: pEls, minHSize: minHSize, minPSize: minPSize});
         var height = jQuery(el).outerHeight();
         var parentHeight = jQuery(el).parent().outerHeight();
       }
     }
 
+  }
+
+  function checkAutoHeight(el) {
+    var origHeight = $(el).parent().outerHeight();
+    var tester = $(el).append('<div class="scaleTextHeightCheck" style="display: block; height: 1px; width: 1px; content: \'\';""></div>')
+    var newHeight = $(el).parent().outerHeight();
+    $('.scaleTextHeightCheck').detach();
+    return (origHeight < newHeight);
   }
 
   function decrementSizes(opts) {
@@ -92,18 +114,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       pDecrement = opts.pDecrement;
     }
 
-    // Decrement element sizing
-    decrementHEls(hEls);
-    decrementPEls(pEls);
+    decrementHEls(hEls, opts.minHSize);
+    decrementPEls(pEls, opts.minPSize);
   }
 
   // Decrements h-level elements
-  function decrementHEls(hEls) {
+  function decrementHEls(hEls, minSize) {
     $(hEls).each(function(index, el) {
       cssAttributes = {
-        'font-size': sizeElAttr(el, 'font-size', hDecrement),
-        'line-height': sizeElAttr(el, 'line-height', hDecrement),
-        'margin-bottom': sizeElAttr(el, 'margin-bottom', hDecrement)
+        'font-size': sizeElAttr(el, 'font-size', hDecrement, minSize),
+        'line-height': sizeElAttr(el, 'line-height', hDecrement, minSize),
+        'margin-bottom': sizeElAttr(el, 'margin-bottom', hDecrement, minSize)
       };
 
       $(el).css('cssText', formCssText(cssAttributes));
@@ -111,11 +132,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   }
 
   // Decrements p-level elements
-  function decrementPEls(pEls) {
+  function decrementPEls(pEls, minSize) {
     $(pEls).each(function(index, el) {
       cssAttributes = {
-        'font-size': sizeElAttr(el, 'font-size', pDecrement),
-        'line-height': sizeElAttr(el, 'line-height', pDecrement)
+        'font-size': sizeElAttr(el, 'font-size', pDecrement, minSize),
+        'line-height': sizeElAttr(el, 'line-height', pDecrement, minSize)
       };
 
       $(el).css('cssText', formCssText(cssAttributes));
@@ -123,7 +144,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   }
 
   // Returns a decremented size for a given element attribute
-  function sizeElAttr(el, attr, decrement) {
+  function sizeElAttr(el, attr, decrement, minSize) {
     var units = '';
 
     if ($(el).css(attr).indexOf('px') > -1 ) {
@@ -134,6 +155,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       units = 'pt';
     } else if ($(el).css(attr).indexOf('%') > -1 ) {
       units = '%';
+    }
+
+    if (minSize.indexOf('px') > -1 ) {
+      minSizeUnits = 'px';
+    } else if (minSize.indexOf('em') > -1 ) {
+      minSizeUnits = 'em';
+    } else if (minSize.indexOf('pt') > -1 ) {
+      minSizeUnits = 'pt';
+    } else if (minSize.indexOf('%') > -1 ) {
+      minSizeUnits = '%';
+    }
+
+    // Force decrement to 1 if already at or below min size font.
+    if (parseInt($(el).css('font-size').replace(units, '')) <= minSize.replace(minSizeUnits, '')) {
+      decrement = 1;
     }
 
     return parseInt(parseInt($(el).css(attr).replace(units, '')) * decrement).toString() + units;
