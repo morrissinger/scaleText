@@ -17,7 +17,7 @@ How to Use
 ----------
 
 1.   Add javascript file to your site, somewhere, and include it, e.g.:
-   <script language="text/javascript" src="scaletext.js"></script
+   <script language="text/javascript" src="scaletext.js"></script>
 2.   Make sure you have jQuery. I've only tested this on jQuery 1.10, but it may work on earlier versions.
 3.   Add `data-toggle="scaletext"` as an attribute to whatever div contains the text you want to scale.
 4.   Include some JS at the end of your document to run the plugin (see below for some examples).
